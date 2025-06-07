@@ -3,10 +3,10 @@
 
 matrix_chain_multiplication:
 
-    // Your implementation here
-    // a0 stores the addresses of all matricies, a1 stores row size, a2 stores column size, a3 stores number
-    // of matricies
-    //first multiply in order
+    # Your implementation here
+    # a0 stores the addresses of all matricies, a1 stores row size, a2 stores column size, a3 stores number
+    # of matricies
+    #first multiply in order
     addi sp, sp, -40
     sw s0, 0(sp)
     sw s1, 4(sp)
@@ -19,13 +19,15 @@ matrix_chain_multiplication:
     sw s8, 32(sp)
     sw ra, 36(sp)
     
-    lw s0, 0(a0) // since a0 is pointer of pointer
-    mv s1, a1 // row size
-    mv s2, a2 //column size
-    mv s3, a3 // number of matrix
-    // s4, s5, s6, s7
+    mv s0, a0 # since a0 is pointer of pointer
+    mv s1, a1 # row size
+    mv s2, a2 #column size
+    mv s3, a3 # number of matrix
+    # s4, s5, s6, s7
     mv s8, zero
 
+    addi s3, s3, -1
+    #mv s3, zero
 n_loop:
     bge s8, s3, result
     beq s8, zero, initial
@@ -33,10 +35,10 @@ normal:
     mv a4, a0
     lw a5, 0(s0)
     addi s0, s0, 4
-    // row #
+    # row #
     lw s6, 0(s1)
     addi s1, s1, 4
-    // col #
+    # col #
     lw s7, 0(s2)
     addi s2, s2, 4
     
@@ -47,41 +49,47 @@ initial:
     addi s0, s0, 4
     lw a5, 0(s0)
     addi s0, s0, 4
-    // row #
+    # row #
     lw s4, 0(s1)
     addi s1, s1, 4
     lw s6, 0(s1)
     addi s1, s1, 4
-    // col #
+    # col #
     lw s5, 0(s2)
     addi s2, s2, 4
     lw s7, 0(s2)
     addi s2, s2, 4
 
 call_subfunction:
-    // new matrix
-    mul a0, s4, s7 // size of new matrix: A's row # * B's col #
-    call malloc // allocate memory, address is stored in a0
-    jal matrix_multiplication // should use jump and link
-    mv s4, a1 // the return width
-    mv s5, a2 // the return height
+    # new matrix
+    mul a0, s4, s7 # size of new matrix: A's row # * B's col #
+    #addi sp, sp, -8 
+    #sw a4, 0(sp)
+    #sw a5, 4(sp)
+    call malloc # allocate memory, address is stored in a0
+    #lw a4, 0(sp)
+    #lw a5, 4(sp)
+    #addi sp, sp, 8
+    jal matrix_multiplication # should use jump and link
+    mv s4, a1 # the return width
+    mv s5, a2 # the return height
 
 next_n:
     addi s8, s8, 1
     j n_loop
 
 matrix_multiplication:
-    // assume the address of two matricies have been saved to a4, a5
-    // size: a: (t3, t4), b: (t5, t6), c: (t3, t6)
-    // size: a: (s4, s5), b: (s6, s7), c: (s4, s7)
-    // TODO: optimization: tiled matrix multiplication
-mv      t0, zero          # i = 0
+    # assume the address of two matricies have been saved to a4, a5
+    # size: a: (t3, t4), b: (t5, t6), c: (t3, t6)
+    # size: a: (s4, s5), b: (s6, s7), c: (s4, s7)
+    # TODO: optimization: tiled matrix multiplication
+    mv      t0, zero          # i = 0
 i_loop:
     bge     t0, s4, done      # if i >= a's row, done
     mv      t1, zero          # j = 0
 j_loop:
     bge     t1, s7, next_i    # if j >= b's col, next i
-    li      t2, 0             # sum = 0
+    mv      t2, zero             # sum = 0
     mv      t3, zero          # k = 0
 k_loop:
     bge     t3, s5, store_c   # if k >= a's col = b's row, store
@@ -108,29 +116,29 @@ k_loop:
     j       k_loop
 
 store_c:
-    # C[i][j] = sum → *(a3 + (i * A's col + j) * 4) C's address is on a0
-    mul     t4, t0, s5
+    # C[i][j] = sum → *(a0 + (i * B's col + j) * 4) C's base address is on a0
+    mul     t4, t0, s7
     add     t4, t4, t1
     slli    t4, t4, 2
     add     t4, a0, t4
     sw      t2, 0(t4)
 
-    addi    t1, t1, 1
+    addi    t1, t1, 1 # j = j + 1
     j       j_loop
 
 next_i:
-    addi    t0, t0, 1
+    addi    t0, t0, 1 # i = i + 1
     j       i_loop
 
 done:
-    // store C's height and width
-    mv a1, s4 // A's row
-    mv a2, s7 // B's col
+    # store C's height and width
+    mv a1, s4 # A's row
+    mv a2, s7 # B's col
     jr ra
-    //return
+    #return
 
 result:
-    // Return to main program after completion (Remember to store the return address at the beginning)
+    # Return to main program after completion (Remember to store the return address at the beginning)
     lw s0, 0(sp)
     lw s1, 4(sp)
     lw s2, 8(sp)
@@ -142,5 +150,5 @@ result:
     lw s8, 32(sp)
     lw ra, 36(sp)
     addi sp, sp, 40
-    // jr ra
+    # jr ra
     jr ra
