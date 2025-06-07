@@ -63,6 +63,7 @@ initial:
 call_subfunction:
     # new matrix
     mul a0, s4, s7 # size of new matrix: A's row # * B's col #
+    slli a0, a0, 2
     #addi sp, sp, -8 
     #sw a4, 0(sp)
     #sw a5, 4(sp)
@@ -150,5 +151,7 @@ result:
     lw s8, 32(sp)
     lw ra, 36(sp)
     addi sp, sp, 40
+    #li a0, 4
+    #call malloc
     # jr ra
     jr ra
