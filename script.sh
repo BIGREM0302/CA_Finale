@@ -14,9 +14,7 @@ for l1i_size   in "${sizes[@]}";  do
   for l1d_size in "${sizes[@]}";  do
     for l2_size in "${sizes[@]}"; do
 
-            GEM5_ARGS="--l1i_size ${l1i_size}kB --l1i_assoc 8 \
-              --l1d_size ${l1d_size}kB --l1d_assoc 8 \
-              --l2_size  ${l2_size}kB  --l2_assoc  8"
+            GEM5_ARGS="GEM5_ARGS = --l1i_size ${l1i_size}kB --l1i_assoc 8 --l1d_size ${l1d_size}kB --l1d_assoc 8 --l2_size ${l2_size}kB --l2_assoc 8"
 
             printf '%s\n' "${GEM5_ARGS}" > "${CONF_FILE}"
 
