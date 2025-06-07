@@ -23,42 +23,45 @@ matrix_chain_multiplication:
     mv s1, a1 # row size
     mv s2, a2 #column size
     mv s3, a3 # number of matrix
+    addi s3, s3, -1 # n-1
+    slli t0, s3, 2 # (n-1)*4
+    add s0, s0, t0
+    add s1, s1, t0
+    add s2, s2, t0
     # s4, s5, s6, s7
-    mv s8, zero
-
-    addi s3, s3, -1
+    mv s8, s3 # s8 = a3 - 1 = n - 1
     #mv s3, zero
 n_loop:
-    bge s8, s3, result
-    beq s8, zero, initial
+    beq s8, zero, result # when s8 = 0, complete
+    beq s8, s3, initial # when s8 = s3
 normal:
-    mv s9, a0
-    lw s10, 0(s0)
-    addi s0, s0, 4
+    mv s10, a0
+    lw s9, 0(s0)
+    addi s0, s0, -4
     # row #
-    lw s6, 0(s1)
-    addi s1, s1, 4
+    lw s4, 0(s1)
+    addi s1, s1, -4
     # col #
-    lw s7, 0(s2)
-    addi s2, s2, 4
+    lw s5, 0(s2)
+    addi s2, s2, -4
     
     j call_subfunction
 
 initial:
-    lw s9, 0(s0)
-    addi s0, s0, 4
     lw s10, 0(s0)
-    addi s0, s0, 4
+    addi s0, s0, -4
+    lw s9, 0(s0)
+    addi s0, s0, -4
     # row #
-    lw s4, 0(s1)
-    addi s1, s1, 4
     lw s6, 0(s1)
-    addi s1, s1, 4
+    addi s1, s1, -4
+    lw s4, 0(s1)
+    addi s1, s1, -4
     # col #
-    lw s5, 0(s2)
-    addi s2, s2, 4
     lw s7, 0(s2)
-    addi s2, s2, 4
+    addi s2, s2, -4
+    lw s5, 0(s2)
+    addi s2, s2, -4
 
 call_subfunction:
     # new matrix
@@ -72,11 +75,11 @@ call_subfunction:
     #lw s10, 4(sp)
     #addi sp, sp, 8
     jal matrix_multiplication # should use jump and link
-    mv s4, a1 # the return width
-    mv s5, a2 # the return height
+    mv s6, a1 # the return width
+    mv s7, a2 # the return height
 
 next_n:
-    addi s8, s8, 1
+    addi s8, s8, -1
     j n_loop
 
 matrix_multiplication:
