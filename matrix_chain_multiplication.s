@@ -7,7 +7,7 @@ matrix_chain_multiplication:
     # a0 stores the addresses of all matricies, a1 stores row size, a2 stores column size, a3 stores number
     # of matricies
     #first multiply in order
-    addi sp, sp, -40
+    addi sp, sp, -52
     sw s0, 0(sp)
     sw s1, 4(sp)
     sw s2, 8(sp)
@@ -17,7 +17,10 @@ matrix_chain_multiplication:
     sw s6, 24(sp)
     sw s7, 28(sp)
     sw s8, 32(sp)
-    sw ra, 36(sp)
+    sw s9, 36(sp)
+    sw s10,40(sp)
+    sw s11,44(sp)
+    sw ra, 48(sp)
     
     mv s0, a0 # since a0 is pointer of pointer
     mv s1, a1 # row size
@@ -152,8 +155,11 @@ result:
     lw s6, 24(sp)
     lw s7, 28(sp)
     lw s8, 32(sp)
-    lw ra, 36(sp)
-    addi sp, sp, 40
+    lw s9, 36(sp)
+    lw s10,40(sp)
+    lw s11,44(sp)
+    lw ra, 48(sp)
+    addi sp, sp, 52
     #li a0, 4
     #call malloc
     # jr ra
