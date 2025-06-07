@@ -32,8 +32,8 @@ n_loop:
     bge s8, s3, result
     beq s8, zero, initial
 normal:
-    mv a4, a0
-    lw a5, 0(s0)
+    mv s9, a0
+    lw s10, 0(s0)
     addi s0, s0, 4
     # row #
     lw s6, 0(s1)
@@ -45,9 +45,9 @@ normal:
     j call_subfunction
 
 initial:
-    lw a4, 0(s0)
+    lw s9, 0(s0)
     addi s0, s0, 4
-    lw a5, 0(s0)
+    lw s10, 0(s0)
     addi s0, s0, 4
     # row #
     lw s4, 0(s1)
@@ -65,11 +65,11 @@ call_subfunction:
     mul a0, s4, s7 # size of new matrix: A's row # * B's col #
     slli a0, a0, 2
     #addi sp, sp, -8 
-    #sw a4, 0(sp)
-    #sw a5, 4(sp)
+    #sw s9, 0(sp)
+    #sw s10, 4(sp)
     call malloc # allocate memory, address is stored in a0
-    #lw a4, 0(sp)
-    #lw a5, 4(sp)
+    #lw s9, 0(sp)
+    #lw s10, 4(sp)
     #addi sp, sp, 8
     jal matrix_multiplication # should use jump and link
     mv s4, a1 # the return width
@@ -80,7 +80,7 @@ next_n:
     j n_loop
 
 matrix_multiplication:
-    # assume the address of two matricies have been saved to a4, a5
+    # assume the address of two matricies have been saved to s9, s10
     # size: a: (t3, t4), b: (t5, t6), c: (t3, t6)
     # size: a: (s4, s5), b: (s6, s7), c: (s4, s7)
     # TODO: optimization: tiled matrix multiplication
@@ -95,18 +95,18 @@ j_loop:
 k_loop:
     bge     t3, s5, store_c   # if k >= a's col = b's row, store
 
-    # A[i][k] = *(a4 + (i * a's col + k) * 4)
+    # A[i][k] = *(s9 + (i * a's col + k) * 4)
     mul     t4, t0, s5        # i * A_cols
     add     t4, t4, t3        # i * A_cols + k
     slli    t4, t4, 2         # offset * 4
-    add     t4, a4, t4
+    add     t4, s9, t4
     lw      t5, 0(t4)         # t5 = A[i][k]
 
     # B[k][j] = *(a5 + (k * b's col + j) * 4)
     mul     t4, t3, s7        # k * B_cols
     add     t4, t4, t1        # k * B_cols + j
     slli    t4, t4, 2
-    add     t4, a5, t4
+    add     t4, s10, t4
     lw      t6, 0(t4)         # t6 = B[k][j]
 
     # sum += A[i][k] * B[k][j]
