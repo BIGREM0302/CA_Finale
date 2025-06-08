@@ -55,7 +55,7 @@ k_loop:
     j       k_loop
 
 store_c:
-    # C[i][j] = sum â†’ *(a0 + (i * B's col + j) * 4) C's base address is on a0
+    # C[i][j] = sum ¡÷ *(a0 + (i * B's col + j) * 4) C's base address is on a0
     mul     t4, t0, s7
     add     t4, t4, t1
     slli    t4, t4, 2
