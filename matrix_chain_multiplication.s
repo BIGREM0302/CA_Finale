@@ -211,6 +211,10 @@ compute_result:
 
     # left = compute_result(matrices, rows, cols, split, i, k)
     # parameters
+    mv a0, s2    # matrices
+    mv a1, s3    # rows
+    mv a2, s4    # cols
+    mv a3, s5    # split_ptr
     mv a5, t2    # k
 
     call compute_result # = jal ra, compute_result # return matrix's address is in a0
