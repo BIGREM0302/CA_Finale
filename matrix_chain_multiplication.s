@@ -135,7 +135,6 @@ table_next_len:
     addi    s6, s6, 1        # len++
     j       table_len_loop
 table_done:
-    mv      a3, s5           # return S base
     # prepare those parameters compute_result need
     # a0: matrices (int**)
     # a1: rows (int*)
@@ -144,18 +143,11 @@ table_done:
     # a4: i
     # a5: j
     # s9: count (全域傳入)
-    mv a0, s0
-    mv a1, s1
-    mv a2, s2
     mv a4, zero # initialize at i = 0
     mv s9, s3 # the total number of matrix
     addi s3, s3, -1
     mv a5, s3 # initialize at j = n-1
-
-    mv s2, a0    # save matrix address
-    mv s3, a1    # save row address
-    mv s4, a2    # save col address
-    mv s5, a3    # save split address
+    mv s3, s1    # save row address
 
     jal compute_result
 
@@ -205,7 +197,7 @@ compute_result:
     mul t0, a4, s9
     add t0, t0, a5
     slli t0, t0, 2
-    add t1, a3, t0
+    add t1, s5, t0
     lw t2, 0(t1)        # t2 = split[i][j]
 
     # k = t2
@@ -215,10 +207,6 @@ compute_result:
 
     # left = compute_result(matrices, rows, cols, split, i, k)
     # parameters
-    mv a0, s2    # matrices
-    mv a1, s3    # rows
-    mv a2, s4    # cols
-    mv a3, s5    # split_ptr
     mv a5, t2    # k
 
     call compute_result # = jal ra, compute_result # return matrix's address is in a0
@@ -226,10 +214,6 @@ compute_result:
 
     # right = compute_result(matrices, rows, cols, split, k+1, j)
     # parameters
-    mv a0, s2    # matrices
-    mv a1, s3    # rows
-    mv a2, s4    # cols
-    mv a3, s5    # split_ptr
     addi a4, s8, 1 # k+1
     mv a5, s7    # j
 
@@ -293,7 +277,7 @@ do_mallocd:
 return_leaf:
     # a0 = matrices[i]
     slli t0, a4, 2
-    add t0, a0, t0
+    add t0, s2, t0
     lw a0, 0(t0) # a0 now stores the address of matrix i
 
 end_compute:
