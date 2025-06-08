@@ -143,11 +143,17 @@ table_done:
     # a4: i
     # a5: j
     # s9: count (全域傳入)
+    mv a0, s0
+    mv a1, s1
+    mv a2, s2
     mv a4, zero # initialize at i = 0
     mv s9, s3 # the total number of matrix
-    addi s3, s3, -1
-    mv a5, s3 # initialize at j = n-1
-    mv s3, s1    # save row address
+    addi s5, s9, -1
+
+    mv s2, a0    # save matrix address
+    mv s3, a1    # save row address
+    mv s4, a2    # save col address
+    mv s5, a3    # save split address
 
     jal compute_result
 
