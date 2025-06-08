@@ -8,43 +8,45 @@ C: .word 0, 0
 
 main:
 
-la a4, A
-la a5, B
+la a1, A
+la a2, B
 la a0, C
 
-li s4, 2
-li s5, 3
-li s6, 3
-li s7, 1
+li a3, 2
+li a4, 3
+li a5, 3
+li a6, 1
 
 matrix_multiplication:
-    # assume the address of two matricies have been saved to a4, a5
+    # assume the address of two matricies have been saved to s9, s10
+    # assume the address of two matricies have been saved to a1, a2
     # size: a: (t3, t4), b: (t5, t6), c: (t3, t6)
     # size: a: (s4, s5), b: (s6, s7), c: (s4, s7)
+    # size: a: (a3, a4), b: (a5, a6), c: (a3, a6)
     # TODO: optimization: tiled matrix multiplication
-mv      t0, zero          # i = 0
+    mv      t0, zero          # i = 0
 i_loop:
-    bge     t0, s4, done      # if i >= a's row, done
+    bge     t0, a3, done      # if i >= a's row, done
     mv      t1, zero          # j = 0
 j_loop:
-    bge     t1, s7, next_i    # if j >= b's col, next i
+    bge     t1, a6, next_i    # if j >= b's col, next i
     mv      t2, zero             # sum = 0
     mv      t3, zero          # k = 0
 k_loop:
-    bge     t3, s5, store_c   # if k >= a's col = b's row, store
+    bge     t3, a4, store_c   # if k >= a's col = b's row, store
 
-    # A[i][k] = *(a4 + (i * a's col + k) * 4)
-    mul     t4, t0, s5        # i * A_cols
+    # A[i][k] = *(a1 + (i * a's col + k) * 4)
+    mul     t4, t0, a4        # i * A_cols
     add     t4, t4, t3        # i * A_cols + k
     slli    t4, t4, 2         # offset * 4
-    add     t4, a4, t4
+    add     t4, a1, t4
     lw      t5, 0(t4)         # t5 = A[i][k]
 
-    # B[k][j] = *(a5 + (k * b's col + j) * 4)
-    mul     t4, t3, s7        # k * B_cols
+    # B[k][j] = *(a2 + (k * b's col + j) * 4)
+    mul     t4, t3, a6        # k * B_cols
     add     t4, t4, t1        # k * B_cols + j
     slli    t4, t4, 2
-    add     t4, a5, t4
+    add     t4, a2, t4
     lw      t6, 0(t4)         # t6 = B[k][j]
 
     # sum += A[i][k] * B[k][j]
@@ -56,7 +58,7 @@ k_loop:
 
 store_c:
     # C[i][j] = sum ¡÷ *(a0 + (i * B's col + j) * 4) C's base address is on a0
-    mul     t4, t0, s7
+    mul     t4, t0, a6
     add     t4, t4, t1
     slli    t4, t4, 2
     add     t4, a0, t4
@@ -70,10 +72,7 @@ next_i:
     j       i_loop
 
 done:
-    # store C's height and width
-    mv a1, s4 # A's row
-    mv a2, s7 # B's col
-    
+
     li a7, 10
     ecall
     #jr ra
