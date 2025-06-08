@@ -152,6 +152,10 @@ table_done:
     addi s3, s3, -1
     mv a5, s3 # initialize at j = n-1
 
+    mv s2, a0    # save matrix address
+    mv s3, a1    # save row address
+    mv s4, a2    # save col address
+    mv s5, a3    # save split address
 
     jal compute_result
 
