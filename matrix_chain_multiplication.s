@@ -266,10 +266,32 @@ compute_result:
     lw t6, 0(t6)       # t6 = cols[j]
     mv a6, t6
 
+do_mallocd:
     mul t3, t3, t6
     slli a0, t3, 2     # malloc size = rows[i] * cols[j] * 4
     call malloc        # address is stored in a0, a0 to a4 are contaminated
 
+    # malloc new matrix: rows[i] × cols[j] × 4
+    slli t3, s6, 2     # i*4
+    add t3, s3, t3     # row's address + offset
+    lw t3, 0(t3)       # t3 = rows[i]
+    mv a3, t3
+
+    slli t4, s8, 2  # k*4
+    add t5, s3, t4
+    addi t5, t5, 4  # (k+1)*4
+    add t4, s4, t4
+    lw t4, 0(t4)    # t4 = col[k]
+    lw t5, 0(t5)    # t5 = row[k+1]
+    mv a4, t4
+    mv a5, t5
+
+    slli t6, s7, 2     # j*4
+    add t6, s4, t6     # col's address + offset
+    lw t6, 0(t6)       # t6 = cols[j]
+    mv a6, t6
+
+    add a0, a0, zero
     # multiply_matrix(new_matrix, left, right, rows[i], cols[k], rows[k+1], cols[j])
     # prepare parameters for multiply matrix~
     mv a1, s0 # left matrix
