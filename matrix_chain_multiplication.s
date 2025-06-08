@@ -72,12 +72,13 @@ table_i_loop:
 
     # m[i][j] = +infty
     mul     t3, t0, s3
-    add     t3, t3, t2       # t3 = i*n + j
+    add     t3, t3, t2
     slli    t3, t3, 2
     add     a6, s4, t3 # find a6, the address of m[i][j]
     add     a7, s5, t3 # find a7, the address of s[i][j]
     li      t5, 0x7fffffff # maximum of signed, t6 as the temp value
     mv      t6, t0 # candidate of split point, initialize as i
+    #sw      t4, 0(t3)
 
     mv      t4, t0           # t4 = k, = i initially
 table_k_loop:
@@ -118,10 +119,17 @@ table_k_loop:
     add     a3, a3, a4       # total cost
 
     # ---------- dp: m,s ----------
+    #lw      a5, 0(a6)        # current m[i][j]
     bge     a3, t5, table_skip_upd # if bigger, then skip update
     mv      t5, a3            #update temp value of m[i][j]
     mv      t6, t4            #update candidate of split position as k
+    #sw      a3, 0(a6)        # m[i][j] = cost
 
+    #mul     a6, t0, s3
+    #add     a6, a6, t2
+    #slli    a6, a6, 2
+    #add     a6, s5, a6
+    #sw      t4, 0(a7)        # s[i][j] = k
 table_skip_upd:
     addi    t4, t4, 1        # k++
     j       table_k_loop
@@ -143,17 +151,14 @@ table_done:
     # a4: i
     # a5: j
     # s9: count (全域傳入)
-    mv a0, s0
-    mv a1, s1
     mv a2, s2
     mv a4, zero # initialize at i = 0
     mv s9, s3 # the total number of matrix
-    addi s5, s9, -1
+    addi a5, s9, -1
 
-    mv s2, a0    # save matrix address
-    mv s3, a1    # save row address
+    mv s2, s0    # save matrix address
+    mv s3, s1    # save row address
     mv s4, a2    # save col address
-    mv s5, a3    # save split address
 
     jal compute_result
 
@@ -185,7 +190,6 @@ table_done:
 
 compute_result:
     # save the previous ra, s0 ~ s7
-    # s2,s3,s4,s5 keep
     addi sp, sp, -24
     sw ra, 0(sp)
     sw s0, 4(sp)
@@ -193,8 +197,6 @@ compute_result:
     sw s6, 12(sp)
     sw s7, 16(sp)
     sw s8, 20(sp)
-
-    # a3 = dp table, a4 = i, a5 = j
 
     # base case: if i == j → return matrices[i]
     beq a4, a5, return_leaf
@@ -230,21 +232,10 @@ compute_result:
     slli t3, s6, 2     # i*4
     add t3, s3, t3     # row's address + offset
     lw t3, 0(t3)       # t3 = rows[i]
-    mv a3, t3
-
-    slli t4, s8, 2  # k*4
-    add t5, s3, t4
-    addi t5, t5, 4  # (k+1)*4
-    add t4, s4, t4
-    lw t4, 0(t4)    # t4 = col[k]
-    lw t5, 0(t5)    # t5 = row[k+1]
-    mv a4, t4
-    mv a5, t5
 
     slli t6, s7, 2     # j*4
     add t6, s4, t6     # col's address + offset
     lw t6, 0(t6)       # t6 = cols[j]
-    mv a6, t6
 
 do_mallocd:
     mul t3, t3, t6
