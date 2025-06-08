@@ -213,9 +213,7 @@ compute_result:
     lw t2, 0(t1)        # t2 = split[i][j]
 
     # k = t2
-    # left = compute_result(matrices, rows, cols, split, i, k)
-    mv a4, a4    # i
-    mv a5, t2    # k
+    
     mv s2, a0    # save matrix address
     mv s3, a1    # save row address
     mv s4, a2    # save col address
@@ -224,10 +222,20 @@ compute_result:
     mv s7, a5    # save j
     mv s8, t2    # save k
 
+    # left = compute_result(matrices, rows, cols, split, i, k)
+    # parameters
+    mv a0, s2    # matrices
+    mv a1, s3    # rows
+    mv a2, s4    # cols
+    mv a3, s5    # split_ptr
+    mv a4, a4    # i
+    mv a5, t2    # k
+
     call compute_result # = jal ra, compute_result # return matrix's address is in a0
     mv s0, a0    # s0 = left_ptr, the pointer to the left matrix, s0 will be saved always
 
     # right = compute_result(matrices, rows, cols, split, k+1, j)
+    # parameters
     mv a0, s2    # matrices
     mv a1, s3    # rows
     mv a2, s4    # cols
@@ -244,14 +252,13 @@ compute_result:
     lw t3, 0(t3)       # t3 = rows[i]
     mv a3, t3
 
-    slli t4, s6, 2  # i*4
+    slli t4, s8, 2  # k*4
+    add t5, s3, t4
+    addi t5, t5, 4  # (k+1)*4
     add t4, s4, t4
-    lw t4, 0(t4)    # t4 = col[i]
+    lw t4, 0(t4)    # t4 = col[k]
+    lw t5, 0(t5)    # t5 = row[k+1]
     mv a4, t4
-
-    slli t5, s7, 2     # j*4
-    add t5, s3, t5     # row's address + offset
-    lw t5, 0(t5)       # t5 = rows[j]
     mv a5, t5
 
     slli t6, s7, 2     # j*4
@@ -261,9 +268,9 @@ compute_result:
 
     mul t3, t3, t6
     slli a0, t3, 2     # malloc size = rows[i] * cols[j] * 4
-    call malloc        # address is stored in a0
+    call malloc        # address is stored in a0, a0 to a4 are contaminated
 
-    # multiply_matrix(left, rows[i], cols[k], right, rows[k+1], cols[j], new_matrix)
+    # multiply_matrix(new_matrix, left, right, rows[i], cols[k], rows[k+1], cols[j])
     # prepare parameters for multiply matrix~
     mv a1, s0 # left matrix
     mv a2, s1 # right matrix
@@ -293,10 +300,7 @@ end_compute:
     ret
 
 matrix_multiplication:
-    # assume the address of two matricies have been saved to s9, s10
     # assume the address of two matricies have been saved to a1, a2
-    # size: a: (t3, t4), b: (t5, t6), c: (t3, t6)
-    # size: a: (s4, s5), b: (s6, s7), c: (s4, s7)
     # size: a: (a3, a4), b: (a5, a6), c: (a3, a6)
     # TODO: optimization: tiled matrix multiplication
     mv      t0, zero          # i = 0
